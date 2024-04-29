@@ -24,7 +24,7 @@ pub fn app() -> Html {
             let dispatch = dispatch.clone();
             let is_loaded = is_loaded.clone();
             wasm_bindgen_futures::spawn_local(async move {
-                let tasks = get_tasks(&token).await;
+                // let tasks = get_tasks(&token).await;
                 match get_tasks(&token).await {
                     Ok(tasks) => {
                         set_tasks(tasks, dispatch.clone());

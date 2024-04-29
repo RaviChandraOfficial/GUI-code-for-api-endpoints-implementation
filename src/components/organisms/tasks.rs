@@ -19,7 +19,7 @@ pub struct Props {
 pub fn tasks(props: &Props) -> Html {
     let stylesheet = Style::new(css!(
         r#"
-    width: 50%;
+    width: 100%;
     text-align: center;
   "#
     ))

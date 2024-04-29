@@ -1,5 +1,5 @@
 use crate::{
-    api::{patch_task::PatchTask, AuthResponse, TaskResponse},
+    api::{patch_task::PatchTask,SigninResponse, TaskResponse},
     components::atoms::bb_select::SelectOption,
 };
 use gloo::console;
@@ -57,19 +57,35 @@ pub struct Task {
     pub title: String,
 }
 
-pub fn login_reducer(auth_response: AuthResponse, dispatch: Dispatch<Store>) {
+
+pub struct PostCredentials{
+    pub id: i32,
+    pub name:String,
+    pub location: String,
+    pub data: String
+}
+
+
+// Updates the username and token in the store when a user logs in.
+pub fn login_reducer(auth_response: &SigninResponse, dispatch: Dispatch<Store>) {
+
     dispatch.reduce_mut(move |store| {
-        store.username = auth_response.data.username;
-        store.token = auth_response.data.token;
+        // store.username = auth_response.refresh_token.clone();
+        store.token = auth_response.access_token.clone();
+        // store.id_token= auth_response.id_token.cl
     });
 }
 
+
+//Sets the tasks in the store based on a response from an API.
 pub fn set_tasks(tasks: TaskResponse, dispatch: Dispatch<Store>) {
     dispatch.reduce_mut(move |store| {
         store.tasks = tasks.data;
     })
 }
 
+
+//Clears the user information and tasks from the store when a user logs out.
 pub fn logout(dispatch: Dispatch<Store>) {
     dispatch.reduce_mut(|store| {
         store.username = String::new();
@@ -78,6 +94,8 @@ pub fn logout(dispatch: Dispatch<Store>) {
     });
 }
 
+
+//Updates a specific task in the store by ID.
 pub fn update_task_by_id(dispatch: Dispatch<Store>, task_id: u32, patch_task: PatchTask) {
     dispatch.reduce_mut(move |store| {
         let task = store.tasks.iter_mut().find(|task| task.id == task_id);
@@ -102,10 +120,11 @@ pub fn update_task_by_id(dispatch: Dispatch<Store>, task_id: u32, patch_task: Pa
     })
 }
 
+//Removes a specific task by ID from the store.
 pub fn remove_task_by_id(dispatch: Dispatch<Store>, task_id: u32) {
     dispatch.reduce_mut(move |store| {
         let store_tasks = store.tasks.clone();
-        let tasks: Vec<Task> = store_tasks
+        let tasks: Vec<Task> = store_tasks 
             .into_iter()
             .filter(|task| task.id != task_id)
             .collect();
@@ -113,12 +132,16 @@ pub fn remove_task_by_id(dispatch: Dispatch<Store>, task_id: u32) {
     })
 }
 
+
+//Adds a new task to the store
 pub fn add_task(dispatch: Dispatch<Store>, task: Task) {
     dispatch.reduce_mut(move |store| {
         store.tasks.push(task);
     });
 }
 
+
+//Marks a task as completed
 pub fn mark_task_completed(dispatch: Dispatch<Store>, task_id: u32) {
     dispatch.reduce_mut(move |store| {
         let task = store.tasks.iter_mut().find(|task| task.id == task_id);
@@ -131,6 +154,8 @@ pub fn mark_task_completed(dispatch: Dispatch<Store>, task_id: u32) {
     })
 }
 
+
+//Marks a task as uncompleted
 pub fn mark_task_uncompleted(dispatch: Dispatch<Store>, task_id: u32) {
     dispatch.reduce_mut(move |store| {
         let task = store.tasks.iter_mut().find(|task| task.id == task_id);
@@ -142,6 +167,8 @@ pub fn mark_task_uncompleted(dispatch: Dispatch<Store>, task_id: u32) {
     })
 }
 
+
+//Updates the selected filter or sort option
 pub fn select_filter(dispatch: Dispatch<Store>, filter_value: String) {
     dispatch.reduce_mut(move |store| {
         store
@@ -157,6 +184,8 @@ pub fn select_filter(dispatch: Dispatch<Store>, filter_value: String) {
     })
 }
 
+
+//Manages the error message in the UI.
 pub fn select_sort(dispatch: Dispatch<Store>, sort_value: String) {
     dispatch.reduce_mut(move |store| {
         store.sort_options.iter_mut().for_each(move |sort_option| {
@@ -169,6 +198,8 @@ pub fn select_sort(dispatch: Dispatch<Store>, sort_value: String) {
     })
 }
 
+
+//Manages the error message in the UI.
 pub fn reset_error_message(dispatch: Dispatch<Store>) {
     dispatch.reduce_mut(|store| {
         store.error_message = String::new();

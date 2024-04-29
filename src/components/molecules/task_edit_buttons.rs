@@ -29,8 +29,8 @@ pub fn task_edit_buttons() -> Html {
 
     let current_route = use_route::<Route>().unwrap();
     let task_id = match current_route {
-        Route::OneTask { id } => Some(id),
-        Route::EditTask { id } => Some(id),
+        // Route::OneTask { id } => Some(id),
+        // Route::EditTask { id } => Some(id),
         _ => None,
     };
 
@@ -58,7 +58,7 @@ pub fn task_edit_buttons() -> Html {
             <BBLink text="Edit" data_test="edit" route={Route::EditTask { id: task_id.unwrap() }} link_type={LinkType::Button} />
             <BBButton data_test="delete" label="Delete" onclick={delete_onclick} />
         }
-        <BBLink text="Add Task" data_test="add-task" route={Route::AddTask} link_type={LinkType::Button} />
+        // <BBLink text="Add Task" data_test="add-task" route={Route::AddTask} link_type={LinkType::Button} />
       </div>
     }
 }

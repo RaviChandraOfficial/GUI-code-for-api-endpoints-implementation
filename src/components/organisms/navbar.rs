@@ -61,7 +61,7 @@ pub fn navbar() -> Html {
     html! {
       <div class={stylesheet}>
       <section>
-        <BBLink text={"Todo".to_owned()} data_test={"logo".to_owned()} route={Route::Home} />
+        <BBLink text={"Bosch".to_owned()} data_test={"logo".to_owned()} route={Route::Home} />
         if is_logged_in(&token) {
           <div>
             <TaskEditButtons />
@@ -74,15 +74,9 @@ pub fn navbar() -> Html {
             </div>
           } else {
             <div class="nav-right">
-              <BBText data_test="welcome" text={format!("Welcome, {}", username)} />
               <BBLink text={"Logout".to_owned()} data_test={"logout".to_owned()} route={Route::Home} link_type={LinkType::Button} />
-              <BBButton
-                data_test="logout"
-                label="Logout"
-                onclick={logout_onclick}
-              />
-            </div>
-        }
+              <BBButton data_test="logout" label="Logout" onclick={logout_onclick} /> </div> 
+            }
       </section>
       </div>
     }

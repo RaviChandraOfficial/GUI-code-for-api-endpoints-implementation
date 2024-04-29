@@ -8,6 +8,7 @@ use stylist::yew::styled_component;
 use yew::prelude::*;
 
 #[derive(Properties, Clone, PartialEq)]
+
 pub struct Props {
     pub onsubmit: Callback<User>,
     pub action: Action,
@@ -16,14 +17,12 @@ pub struct Props {
 #[derive(Clone, PartialEq)]
 pub enum Action {
     CreateAccount,
-    Login,
 }
 
 impl ToString for Action {
     fn to_string(&self) -> String {
         match self {
             Action::CreateAccount => "Create Account",
-            Action::Login => "Login",
         }
         .to_owned()
     }
@@ -33,7 +32,7 @@ impl ToString for Action {
 pub struct User {
     pub username: String,
     pub password: String,
-    pub emailid:String
+    pub email:String
 }
 
 #[styled_component(AccountForm)]
@@ -61,7 +60,7 @@ pub fn account_form(props: &Props) -> Html {
         let state =state.clone();
         Callback::from(move |emailid:String|{
             let mut user =state.deref().clone();
-            user.emailid=emailid;
+            user.email=emailid;
             state.set(user);
         })
     };

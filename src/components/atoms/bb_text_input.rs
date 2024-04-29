@@ -44,7 +44,7 @@ pub fn bb_text_input(props: &Props) -> Html {
 
       input {
         font-size: 30px;
-        width: 50%;
+        width: 100%;
       }
     "#
     ))

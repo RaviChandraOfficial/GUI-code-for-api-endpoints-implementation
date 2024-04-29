@@ -1,6 +1,7 @@
 use yew::{function_component, html, use_state, Callback, Html, Properties, TargetCast};
 
 // Define properties for your component, if needed
+
 #[derive(Properties, PartialEq)]
 struct TextInputProps {
     on_change: Callback<String>,
