@@ -2,17 +2,8 @@ use stylist::yew::styled_component;
 use stylist::Style;
 use yew::prelude::*;
 use yew::html;
-
-use yew::Callback;
-use yew::use_state;
-// use yew::services::ConsoleService;
-use yew::Context;
-use yew::function_component;
-use wasm_bindgen::JsValue;
-use crate::router::Route;
 use crate::store;
 use crate::store::Store;
-use yew_router::hooks::use_navigator;
 use yewdux::functional::use_store;
 
 
@@ -47,28 +38,21 @@ pub fn logout() -> Html {
     ))
     .unwrap();
 
-    let history = use_navigator().unwrap();
     let (_store, store_dispatch) = use_store::<Store>();
     let success_message = use_state(|| None::<String>);
     let error_message = use_state(|| None::<String>);
 
     let on_logout = {
         let store_dispatch = store_dispatch.clone();
-        let history = history.clone();
         let success_message = success_message.clone();
-        let error_message = error_message.clone();
-        let (store, dispatch) = use_store::<Store>();
+        let (_store, dispatch) = use_store::<Store>();
         
         Callback::from(move |_| {
             // Clear any stored authentication data
             let dispatch = dispatch.clone();
-            store_dispatch.set(Store::default()); // Update this based on your store logic
+            store_dispatch.set(Store::default());
             store::logout(dispatch);
-            // Update the state to reflect logout
             success_message.set(Some("Logout successful!".to_string()));
-            
-            // Redirect to login or home page
-            // history.push(&Route::Login);
         })
     };
 

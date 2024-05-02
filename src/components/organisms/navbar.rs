@@ -1,8 +1,5 @@
-use std::ops::Deref;
 use crate::components::atoms::bb_button::BBButton;
 use crate::components::atoms::bb_link::{BBLink, LinkType};
-use crate::components::atoms::bb_text::BBText;
-use crate::components::molecules::task_edit_buttons::TaskEditButtons;
 use crate::router::Route;
 use crate::store::Store;
 use crate::{api, store};
@@ -35,7 +32,6 @@ pub fn navbar() -> Html {
     .unwrap();
 
     let (store, dispatch) = use_store::<Store>();
-    let username = store.username.clone();
     let token = store.token.clone();
 
     let logout_onclick = {
@@ -65,9 +61,6 @@ pub fn navbar() -> Html {
         <BBLink text={"Bosch".to_owned()} data_test={"logo".to_owned()} route={Route::Home} />
         if is_logged_in(&token) {
           <div>
-            <TaskEditButtons />
-          </div>
-          <div>
               <BBButton data_test="logout" label="Logout" onclick={logout_onclick} /> </div>
         }
         if !is_logged_in(&token) {
@@ -84,5 +77,5 @@ pub fn navbar() -> Html {
 }
 
 fn is_logged_in(token: &str) -> bool {
-    !token.deref().is_empty()
+    !token.is_empty()
 }

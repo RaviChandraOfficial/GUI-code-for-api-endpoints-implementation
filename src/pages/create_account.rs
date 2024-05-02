@@ -1,21 +1,15 @@
 use crate::api;
 use crate::components::molecules::account_form::{AccountForm, Action, User};
 use crate::router::Route;
-use crate::store::login_reducer;
-use crate::store::Store;
+
 use serde::{Deserialize, Serialize};
 use stylist::yew::styled_component;
 use stylist::Style;
-use wasm_bindgen::{JsCast, JsValue};
-use wasm_bindgen_futures::{spawn_local, JsFuture};
+use wasm_bindgen_futures::spawn_local;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-use yewdux::prelude::*;
 
 
-use yew::prelude::*;
-
-use web_sys::window;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Default)]
 struct SignUpData {
@@ -34,7 +28,7 @@ pub struct Props {
 
 #[styled_component(CreateAccount)]
 pub fn create_account() -> Html {
-  let navigator = use_navigator();
+
     let stylesheet = Style::new(css!(
         r#"
           section {
@@ -62,18 +56,16 @@ pub fn create_account() -> Html {
     .unwrap();
 
     let history = use_navigator().unwrap();
-    let (_store, dispatch) = use_store::<Store>();
+
     let success_message = use_state(|| None::<String>);
     let error_message = use_state(|| None::<String>);
     let onsubmit = {
-        let store_dispatch = dispatch.clone();
+
         let success_message = success_message.clone();
         let error_message = error_message.clone();
-        let navigator_clone = navigator.clone();
-        // let navigator_ref = &navigator; 
+
         Callback::from(move |user: User| {
             let history = history.clone();
-            let store_dispatch = store_dispatch.clone();
             let success_message = success_message.clone();
             let error_message = error_message.clone();
             let user_data = SignUpData {
@@ -84,7 +76,7 @@ pub fn create_account() -> Html {
             // Inside the `onsubmit` callback
             spawn_local(async move {
                 match api::create_account(user_data.username, user_data.password, user_data.email).await {
-                    Ok(auth_response) => {
+                    Ok(_auth_response) => {
                         success_message.set(Some("Sign-up successful! Redirecting...".to_string()));
                         history.push(&Route::ConfirmSignUp);  
                     },

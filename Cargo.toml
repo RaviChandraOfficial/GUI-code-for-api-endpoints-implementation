@@ -11,17 +11,15 @@ yew-router = "0.17.0"
 stylist = { version = "0.11.0", features = ["yew"] }
 wasm-bindgen = "0.2.80"
 web-sys = { version = "0.3.57", features = ["HtmlInputElement", "HtmlSelectElement"] }
-gloo = "0.8.0"
+gloo = "0.11.0"
 reqwasm = "0.5.0"
 wasm-bindgen-futures = "0.4.30"
 serde = "1.0.136"
 serde_json = "1.0.79"
 yewdux = "0.9.0"
-dotenv = "0.15.0"
 thiserror = "1.0.30"
-js-sys = "0.3.57"
 gloo-net = "0.5.0"
 reqwest = { version = "0.12.4", default-features = false, features = ["json"] } 
-# log = "0.4"
+
 
 

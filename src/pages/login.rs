@@ -1,7 +1,7 @@
 use crate::api;
 use crate::components::molecules::account_form_login::{AccountForm, Action, User};
 use crate::router::Route;
-use crate::store::login_reducer;
+use crate::store::login_token;
 use crate::store::Store;
 
 use stylist::yew::styled_component;
@@ -56,14 +56,13 @@ pub fn login() -> Html {
         Callback::from(move |user: User| {
             let store_dispatch = store_dispatch.clone();
             let history = history.clone();
-            let success_message = success_message.clone();
             let error_message = error_message.clone();
             
             spawn_local(async move {
                 match api::login(user.username, user.password).await {
                     Ok(auth_response) => {
                         history.push(&Route::Home);
-                        login_reducer(&auth_response, store_dispatch);
+                        login_token(&auth_response, store_dispatch);
                     },
                     Err(e) => {
                       println!("{:?}", e);

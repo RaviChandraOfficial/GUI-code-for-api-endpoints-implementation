@@ -6,7 +6,6 @@ use yew::prelude::*;
 #[derive(Clone, PartialEq)]
 pub enum ButtonColor {
     Normal,
-    Red,
 }
 
 impl Default for ButtonColor {
@@ -19,7 +18,6 @@ impl ToString for ButtonColor {
     fn to_string(&self) -> String {
         match self {
             ButtonColor::Normal => "normal",
-            ButtonColor::Red => "red",
         }
         .to_owned()
     }
