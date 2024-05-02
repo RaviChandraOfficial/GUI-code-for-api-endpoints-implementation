@@ -1,19 +1,77 @@
+use std::ops::Deref;
+
 use crate::{
     components::atoms::bb_select::BBSelect,
     components::{atoms::bb_select::SelectOption, organisms::tasks::Tasks},
     store::{self, Store, Task},
 };
+// use yew_router::components::RouterAnchor;
 use stylist::{yew::styled_component, Style};
 use yew::prelude::*;
 use yewdux::prelude::*;
-
+use yew_router::prelude::Link;
+use crate::router::Route;
 #[styled_component(Home)]
 pub fn component() -> Html {
+    // let stylesheet = Style::new(css!(
+    //     r#"
+    //     section {
+    //         display: flex;
+    //         justify-content: space-around;
+    //         padding: 20px;
+            
+    //     }
+        
+    //     a {
+    //         padding: 10px 20px;
+    //         background-color: yellow;
+    //         color: white;
+    //         text-decoration: none;
+    //         border-radius: 5px;
+    //     }
+        
+    //     a:hover {
+    //         background-color: #0056b3;
+    //     }
+        
+    //     "#
+    // ))
     let stylesheet = Style::new(css!(
         r#"
-          display: flex;
-          flex-direction: column;
-          align-items: center;
+        .section-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 90%;
+            height: 70vh;
+        }
+
+        .link-section {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            margin: 10px;
+            width: 50%;
+            border-radius: 30px;
+        }
+        
+        a {
+            font-size: 24px; 
+            padding: 15px 30px; 
+            background-color: yellow;
+            color: black; 
+            text-decoration: none;
+            border-radius: 5px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        a:hover {
+            background-color: #0056b3;
+            color: white;
+        }
         "#
     ))
     .unwrap();
@@ -38,80 +96,36 @@ pub fn component() -> Html {
     let token = store.token.clone();
 
     html! {
-      <section class={stylesheet}>
-        if !token.is_empty() {
-            <div>
-            <div class="filter">
-                <BBSelect
-                data_test="filter"
-                id="filter"
-                label="Filter Tasks"
-                options={filter_options.clone()}
-                onchange={filter_onchange}
-                />
+        <>
+        if is_logged_in(&token){
+        <div class={stylesheet}>
+            <div class="section-container">
+                <section class="link-section" style="background-color: #f0f8ff;"> // Light blue background
+                    <Link<Route> to={Route::Getdata}>{ "GET" }</Link<Route>>
+                </section>
+                <section class="link-section" style="background-color: #f5fffa;"> // Mint cream background
+                    <Link<Route> to={Route::PostData}>{ "POST" }</Link<Route>>
+                </section>
+                <section class="link-section" style="background-color: #fffacd;"> // Lemon chiffon background
+                    <Link<Route> to={Route::PutData}>{ "PUT" }</Link<Route>>
+                </section>
+                <section class="link-section" style="background-color: #ffe4e1;"> // Misty rose background
+                    <Link<Route> to={Route::DeleteData}>{ "DELETE" }</Link<Route>>
+                </section>
             </div>
-            <div class="sort">
-                <BBSelect
-                data_test="sort"
-                id="sort"
-                label="Sort Tasks"
-                options={sort_options.clone()}
-                onchange={sort_onchange}
-                />
-            </div>
-            </div>
-            <Tasks tasks={sort_tasks(filter_tasks(tasks, filter_options), sort_options)} />
+        </div>
         }
-      </section>
+        </>
     }
 }
 
-fn filter_tasks(tasks: Vec<Task>, filter_options: Vec<SelectOption>) -> Vec<Task> {
-    let selected_filter_option = filter_options
-        .into_iter()
-        .find(|filter_option| filter_option.is_selected)
-        .unwrap_or_else(|| SelectOption::new("none", "None", true));
 
-    tasks
-        .into_iter()
-        .filter(|task| match selected_filter_option.value.as_str() {
-            "none" => true,
-            "completed" => task.completed_at.is_some(),
-            "uncompleted" => task.completed_at.is_none(),
-            "priority_a" => task.priority.is_some() && task.priority.as_ref().unwrap() == "A",
-            "priority_b" => task.priority.is_some() && task.priority.as_ref().unwrap() == "B",
-            "priority_c" => task.priority.is_some() && task.priority.as_ref().unwrap() == "C",
-            _ => true,
-        })
-        .collect()
+
+
+
+fn is_logged_in(token: &str) -> bool {
+    !token.deref().is_empty()
 }
-
-fn sort_tasks(mut tasks: Vec<Task>, sort_options: Vec<SelectOption>) -> Vec<Task> {
-    let selected_sort_option = sort_options
-        .into_iter()
-        .find(|sort_option| sort_option.is_selected)
-        .unwrap_or_else(|| SelectOption::new("created_order", "Created Order", true));
-    tasks.sort_by(|a, b| match selected_sort_option.value.as_str() {
-        "priority" => a
-            .priority
-            .as_ref()
-            .unwrap_or(&"A".to_owned())
-            .partial_cmp(b.priority.as_ref().unwrap_or(&"A".to_owned()))
-            .unwrap(),
-        "name" => a.title.partial_cmp(&b.title).unwrap(),
-        _ => a.id.partial_cmp(&b.id).unwrap(),
-    });
-    tasks
-}
-
-
-
-
-
-
-
-
-
 
 
 

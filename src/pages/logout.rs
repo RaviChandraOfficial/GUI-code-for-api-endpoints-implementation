@@ -10,6 +10,7 @@ use yew::Context;
 use yew::function_component;
 use wasm_bindgen::JsValue;
 use crate::router::Route;
+use crate::store;
 use crate::store::Store;
 use yew_router::hooks::use_navigator;
 use yewdux::functional::use_store;
@@ -56,16 +57,18 @@ pub fn logout() -> Html {
         let history = history.clone();
         let success_message = success_message.clone();
         let error_message = error_message.clone();
+        let (store, dispatch) = use_store::<Store>();
         
         Callback::from(move |_| {
             // Clear any stored authentication data
+            let dispatch = dispatch.clone();
             store_dispatch.set(Store::default()); // Update this based on your store logic
-            
+            store::logout(dispatch);
             // Update the state to reflect logout
             success_message.set(Some("Logout successful!".to_string()));
             
             // Redirect to login or home page
-            history.push(&Route::Login);
+            // history.push(&Route::Login);
         })
     };
 

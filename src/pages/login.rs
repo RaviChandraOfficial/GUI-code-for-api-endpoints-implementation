@@ -11,63 +11,6 @@ use yew::prelude::*;
 use yew_router::prelude::use_navigator;
 use yewdux::prelude::*;
 
-// #[styled_component(Login)]
-// pub fn login() -> Html {
-//     let stylesheet = Style::new(css!(
-//         r#"
-//           section {
-//             display: flex;
-//             justify-content: center;
-//           }
-
-//           section > div {
-//             width: 75vw;
-//           }
-//         "#
-//     ))
-//     .unwrap();
-
-//     let history = use_navigator().unwrap();
-//     let (_store, store_dispatch) = use_store::<Store>();
-
-//     let onsubmit = {
-//         let store_dispatch = store_dispatch.clone();
-//         let history = history.clone();
-//         Callback::from(move |user: User| {
-//             let store_dispatch = store_dispatch.clone();
-//             let history = history.clone();
-            
-//             spawn_local(async move {
-//                 match api::login(user.username, user.password).await {
-//                     Ok(auth_response) => {
-//                         login_reducer(&auth_response, store_dispatch);
-//                         history.push(&Route::Home);
-//                     },
-//                     Err(e) => {
-//                         // Handle login error, e.g., by showing a user-friendly error message
-//                         // log::error!("Login failed: {}", e.as_string().unwrap_or_else(|| "Unknown error".into()));
-//                         // Optionally update the store or state to reflect the failure
-//                     }
-//                 }
-//             });
-//         })
-//     };
-
-//     html! {
-//       <div class={stylesheet}>
-//         <h1>{"Login"}</h1>
-//         <section>
-//           <div>
-//             <AccountForm {onsubmit} action={Action::Login} />
-//           </div>
-//         </section>
-//       </div>
-//     }
-// }
-
-
-
-
 
 #[styled_component(Login)]
 pub fn login() -> Html {
@@ -79,7 +22,7 @@ pub fn login() -> Html {
           }
 
           section > div {
-            width: 75vw;
+            width: 60vw;
           }
 
           .message {

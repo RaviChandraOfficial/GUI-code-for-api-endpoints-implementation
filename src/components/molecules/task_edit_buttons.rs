@@ -55,7 +55,7 @@ pub fn task_edit_buttons() -> Html {
     html! {
       <div class={stylesheet}>
         if task_id.is_some() {
-            <BBLink text="Edit" data_test="edit" route={Route::EditTask { id: task_id.unwrap() }} link_type={LinkType::Button} />
+            // <BBLink text="Edit" data_test="edit" route={Route::EditTask { id: task_id.unwrap() }} link_type={LinkType::Button} />
             <BBButton data_test="delete" label="Delete" onclick={delete_onclick} />
         }
         // <BBLink text="Add Task" data_test="add-task" route={Route::AddTask} link_type={LinkType::Button} />

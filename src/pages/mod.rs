@@ -9,3 +9,7 @@ pub mod one_task;
 pub mod get_data;
 pub mod confirmsignup;
 pub mod logout;
+pub mod post_data;
+pub mod put_data;
+pub mod delete;
+

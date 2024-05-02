@@ -1,5 +1,5 @@
 use crate::{
-    api::{patch_task::PatchTask,SigninResponse, TaskResponse},
+    api::{patch_task::PatchTask,SigninResponse, GetResponse},
     components::atoms::bb_select::SelectOption,
 };
 use gloo::console;
@@ -77,12 +77,12 @@ pub fn login_reducer(auth_response: &SigninResponse, dispatch: Dispatch<Store>) 
 }
 
 
-//Sets the tasks in the store based on a response from an API.
-pub fn set_tasks(tasks: TaskResponse, dispatch: Dispatch<Store>) {
-    dispatch.reduce_mut(move |store| {
-        store.tasks = tasks.data;
-    })
-}
+// //Sets the tasks in the store based on a response from an API.
+// pub fn set_tasks(tasks: GetTaskResponse, dispatch: Dispatch<Store>) {
+//     dispatch.reduce_mut(move |store| {
+//         store.tasks = tasks.data;
+//     })
+// }
 
 
 //Clears the user information and tasks from the store when a user logs out.

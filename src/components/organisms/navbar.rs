@@ -1,5 +1,4 @@
 use std::ops::Deref;
-
 use crate::components::atoms::bb_button::BBButton;
 use crate::components::atoms::bb_link::{BBLink, LinkType};
 use crate::components::atoms::bb_text::BBText;
@@ -40,12 +39,14 @@ pub fn navbar() -> Html {
     let token = store.token.clone();
 
     let logout_onclick = {
+
         let token = store.token.clone();
         let history = use_navigator().unwrap();
         Callback::from(move |_event: MouseEvent| {
             let token = token.clone();
             let dispatch = dispatch.clone();
             let history = history.clone();
+
             wasm_bindgen_futures::spawn_local(async move {
                 match api::logout(&token).await {
                     Ok(_) => {
@@ -66,6 +67,8 @@ pub fn navbar() -> Html {
           <div>
             <TaskEditButtons />
           </div>
+          <div>
+              <BBButton data_test="logout" label="Logout" onclick={logout_onclick} /> </div>
         }
         if !is_logged_in(&token) {
           <div>
@@ -73,9 +76,7 @@ pub fn navbar() -> Html {
             <BBLink text={"Login".to_owned()} data_test={"login".to_owned()} route={Route::Login} link_type={LinkType::Button} />
             </div>
           } else {
-            <div class="nav-right">
-              <BBLink text={"Logout".to_owned()} data_test={"logout".to_owned()} route={Route::Home} link_type={LinkType::Button} />
-              <BBButton data_test="logout" label="Logout" onclick={logout_onclick} /> </div> 
+             
             }
       </section>
       </div>

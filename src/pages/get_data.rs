@@ -1,100 +1,38 @@
-use serde::{Deserialize, Serialize};
-use stylist::{css, yew::styled_component, Style};
+
 use yew::prelude::*;
 use wasm_bindgen_futures::spawn_local;
-use reqwest::Client;
-use web_sys::console;
-use yew_router::hooks::use_navigator;
 use yewdux::functional::use_store;
-use crate::store::{self, Store};
-use crate::api;
-// use crate::store;
-// use store;
-#[derive(Serialize, Deserialize, Debug, Clone)]
-struct Task {
-    id: u32,
-    pub user_name: String,
-    pub location :String,
-    pub data :String,
-    pub name:String,
-}
+use crate::api::{get_tasks, Note};
+use crate::store;
+use crate::router::Route;
+use yew_router::prelude::Link;
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
-struct TaskResponse {
-    tasks: Vec<Task>,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct GetResponse{
-        pub id: i32,
-    pub user_name: String,
-    pub location :String,
-    pub data :String,
-    pub name:String,
-}
-
-
-#[function_component(Get_data)]
+#[function_component(Getdata)]
 pub fn get_data() -> Html {
-    let stylesheet = Style::new(css!(
-        r#"
-          section {
-            display: flex;
-            justify-content: center;
-          }
+    let (store, store_dispatch) = use_store::<store::Store>();
 
-          section > div {
-            width: 60vw;
-          }
+    let success_message = use_state(|| None::<Vec<Note>>);  // Change to Vec<Note>
+    let error_message = use_state(|| None::<String>);
 
-          .message {
-            color: white;
-            font-size: 1em;
-            text-align: center;
-          }
-
-          .error {
-            color: red;
-            font-size: 1em;
-            text-align: center;
-          }
-        "#
-    ))
-    .unwrap();
-let (store, dispatch) = use_store::<Store>();
-    
-    let tasks = use_state(|| Vec::new());
-    let error = use_state(|| None::<String>);
     let fetch_tasks = {
-        let tasks = tasks.clone();
-        let error = error.clone();
+
+        let success_message = success_message.clone();
+        let error_message = error_message.clone();
+        let store = store.clone();  // Clone the store context
         Callback::from(move |_| {
-            let token = store.token.clone();
-            let tasks = tasks.clone();
-            let error = error.clone();
+
+            let success_message = success_message.clone();
+            let error_message = error_message.clone();
+            let token = store.token.clone(); // Clone the token inside the closure
             spawn_local(async move {
-                let client = Client::new();
-                match client.get(&format!("{}/get/user", "http://localhost:3000"))  // Adjust BASE_URL as needed
-                    .header("x-auth-token", token)
-                    .send().await {
-                        Ok(response) => {
-                            if response.status().is_success() {
-                                match response.json::<TaskResponse>().await {
-                                    Ok(task_response) => {
-                                        tasks.set(task_response.tasks);
-                                    },
-                                    Err(_) => {
-                                        error.set(Some("Failed to parse tasks.".to_string()));
-                                    }
-                                }
-                            } else {
-                                error.set(Some(format!("HTTP Error: {}", response.status())));
-                            }
-                        }
-                        Err(_) => {
-                            error.set(Some("Network request failed.".to_string()));
-                        }
+                match get_tasks(&token).await {
+                    Ok(response) => {
+                        success_message.set(Some(response.notes));  // Store the notes directly
+                    },
+                    Err(e) => {
+                        error_message.set(Some(format!("Failed to load tasks: {:?}", e)));
                     }
+                }
             });
         })
     };
@@ -109,20 +47,60 @@ let (store, dispatch) = use_store::<Store>();
 
     html! {
         <>
-            <h1>{"Tasks"}</h1>
-            {
-                if let Some(err) = (*error).as_ref() {
-                    html! { <p>{ err }</p> }
-                } else {
-                    html! {
-                        <ul>
-                            { for (*tasks).iter().map(|task| {
-                                html! { <li>{ format!("{} - {} - {} - {} - {}", task.name, task.user_name, task.location, task.data, task.id) }</li> }
-                            })}
-                        </ul>
+        // <nav style="padding: 10px; background: #f0f0f0; border-bottom: 1px solid black;">
+        // <Link<Route> to={Route::Getdata}>{ "GET" }</Link<Route>>
+        // <Link<Route> to={Route::PostData}>{ "POST" }</Link<Route>>
+        // <Link<Route> to={Route::PutData}>{ "PUT" }</Link<Route>>
+        // <Link<Route> to={Route::DeleteData}>{ "DELETE" }</Link<Route>>
+        // </nav>
+        <table style="width: 100%; background: #f0f0f0; border-bottom: 1px solid black;">
+        <tr>
+            <td style="text-align: center; border-right: 1px solid black;">
+                <Link<Route> to={Route::Getdata}>{ "GET" }</Link<Route>>
+            </td>
+            <td style="text-align: center; border-right: 1px solid black;">
+                <Link<Route> to={Route::PostData}>{ "POST" }</Link<Route>>
+            </td>
+            <td style="text-align: center; border-right: 1px solid black;">
+                <Link<Route> to={Route::PutData}>{ "PUT" }</Link<Route>>
+            </td>
+            <td style="text-align: center;">
+                <Link<Route> to={Route::DeleteData}>{ "DELETE" }</Link<Route>>
+            </td>
+        </tr>
+        </table>
+
+            <div>
+                <h1>{"Get Data:"}</h1>
+                {
+                    if let Some(notes) = (*success_message).as_ref() {
+                        html! {
+                            <table class={"tasks-table"} style="border-spacing: 10px; border-collapse: separate;">
+                                <tr>
+                                    <th style="padding: 8px;">{"ID"}</th>
+                                    <th style="padding: 8px;">{"Name"}</th>
+                                    <th style="padding: 8px;">{"Location"}</th>
+                                    <th style="padding: 8px;">{"Data"}</th>
+                                    <th Style="padding: 8px;">{"Username"}</th>
+                                </tr>
+                                { for notes.iter().map(|note| html! {
+                                    <tr>
+                                        <td style="padding: 8px; border: 1px solid gray;">{note.id.to_string()}</td>
+                                        <td style="padding: 8px; border: 1px solid gray;">{&note.name}</td>
+                                        <td style="padding: 8px; border: 1px solid gray;">{&note.location}</td>
+                                        <td style="padding: 8px; border: 1px solid gray;">{&note.data}</td>
+                                        <td style="padding: 8px; border: 1px solid gray;">{&note.user_name}</td>
+                                    </tr>
+                                })}
+                            </table>
+                        }
+                    } else if let Some(err) = (*error_message).as_ref() {
+                        html! { <div class={"error"}>{ err }</div> }
+                    } else {
+                        html! { <div>{"Data loading.........."}</div> }
                     }
                 }
-            }
+            </div>
         </>
     }
 }
@@ -130,11 +108,205 @@ let (store, dispatch) = use_store::<Store>();
 
 
 
+// use store;
+// #[derive(Serialize, Deserialize, Debug, Clone)]
+// struct Task {
+//     id: u32,
+//     pub user_name: String,
+//     pub location :String,
+//     pub data :String,
+//     pub name:String,
+// }
+
+// #[derive(Serialize, Deserialize, Debug, Clone)]
+// struct TaskResponse {
+//     tasks: Vec<Task>,
+// }
+
+// #[derive(Clone, Default, Serialize, Deserialize, PartialEq, Debug)]
+// #[derive(Serialize, Deserialize, Debug, Clone)]
+// pub struct GetResponse{
+//     pub id: i32,
+//     pub user_name: String,
+//     pub location :String,
+//     pub data :String,
+//     pub name:String,
+// }
+// #[function_component(Getdata)]
+// pub fn get_data() -> Html {
+//     let stylesheet = Style::new(css!(
+//         r#"
+//         section {
+//             display: flex;
+//             justify-content: center;
+//         }
+
+//         section > div {
+//             width: 60vw;
+//         }
+
+//         .message, .error {
+//             font-size: 1em;
+//             text-align: center;
+//         }
+
+//         .message {
+//             color: white;
+//         }
+
+//         .error {
+//             color: red;
+//         }
+//         "#
+//     )).unwrap();
+
+//     let store = use_context::<store::Store>().expect("store not found");
+//     let tasks = use_state(|| Vec::<Note>::new()); // Corrected type to Vec<Note>
+//     let success_message = use_state(|| None::<String>);
+//     let error_message = use_state(|| None::<String>);
+
+//     let fetch_tasks = {
+//         let tasks = tasks.clone();
+//         let success_message = success_message.clone();
+//         let error_message = error_message.clone();
+//         let token = store.token.clone(); // Assuming store.token does not change, capture once
+//         Callback::from(move |_| {
+//             spawn_local(async move {
+//                 match get_tasks(&token).await {
+//                     Ok(response) => {
+//                         let formatted_notes = response.notes.iter()
+//                             .map(|note| format!("ID: {}, Name: {}, Location: {}, Data: {}", note.id, note.name, note.location, note.data))
+//                             .collect::<Vec<String>>()
+//                             .join(", ");
+//                         success_message.set(Some(format!("Notes data fetched: {}", formatted_notes)));
+//                         tasks.set(response.notes.clone());  // Set tasks state with response notes
+//                     }
+//                     Err(e) => {
+//                         error_message.set(Some(format!("Failed to load tasks: {:?}", e)));
+//                     }
+//                 }
+//             });
+//         })
+//     };
+
+//     use_effect_with_deps(
+//         move |_| {
+//             fetch_tasks.emit(());
+//             || ()
+//         },
+//         (),
+//     );
+
+//     html! {
+//         <>
+           
+//                 <div>
+//                     <h1>{"Tasks"}</h1>
+//                     {
+//                         if let Some(msg) = (*success_message).as_ref() {
+//                             html! { <div class={"message"}>{ msg }</div> }
+//                         } else if let Some(err) = (*error_message).as_ref() {
+//                             html! { <div class={"error"}>{ err }</div> }
+//                         } else {
+//                             html! { <div>{"No new messages"}</div> }
+//                         }
+//                     }
+//                 </div>
+        
+//         </>
+//     }
+// } mainnnnnnnnn
 
 
 
 
-// #[styled_component(GetUser)]
+
+
+
+// pub fn get_data() -> Html {
+//     let (store, store_dispatch) = use_store::<store::Store>();
+//     let tasks = use_state(|| Vec::<Note>::new());
+//     let success_message = use_state(|| None::<String>);
+//     let error_message = use_state(|| None::<String>);
+
+//     let fetch_tasks = {
+//         let tasks = tasks.clone();
+//         let success_message = success_message.clone();
+//         let error_message = error_message.clone();
+//         let store = store.clone(); // Clone the store context for use in the closure
+
+//         Callback::from(move |_| {
+//             let tasks = tasks.clone();
+//             let success_message = success_message.clone();
+//             let error_message = error_message.clone();
+//             let token = store.token.clone(); // Move the cloning of `token` inside the closure
+//             spawn_local(async move {
+//                 let success_message = success_message.clone();
+//                 let error_message = error_message.clone();
+//                 match get_tasks(&token).await {
+//                     Ok(response) => {
+//                         let formatted_notes = response.notes.iter()
+//                             .map(|note| format!("ID: {}, Name: {}, Location: {}, Data: {}", note.id, note.name, note.location, note.data))
+//                             .collect::<Vec<String>>()
+//                             .join("|| ");
+//                         success_message.set(Some(format!("Notes data fetched: {}", formatted_notes)));
+//                         tasks.set(response.notes.clone()); // Set tasks state with response notes
+//                     },
+//                     Err(e) => {
+//                         error_message.set(Some(format!("Failed to load tasks: {:?}", e)));
+//                     }
+//                 }
+//             });
+//         })
+//     };
+
+//     use_effect_with_deps(
+//         move |_| {
+//             fetch_tasks.emit(());
+//             || ()
+//         },
+//         (),
+//     );
+//     html! {
+//         <>
+//             <div>
+//                 <h1>{"Tasks"}</h1>
+//                 {
+//                     if let Some(notes) = (*success_message).as_ref() {
+//                         html! {
+//                             <table class={"tasks-table"}>
+//                                 <tr>
+//                                     <th>{"ID"}</th>
+//                                     <th>{"Name"}</th>
+//                                     <th>{"Location"}</th>
+//                                     <th>{"Data"}</th>
+//                                 </tr>
+//                                 { for notes.iter().map(|note| html! {
+//                                     <tr>
+//                                         <td>{note.id.to_string()}</td>
+//                                         <td>{&note.name}</td>
+//                                         <td>{&note.location}</td>
+//                                         <td>{&note.data}</td>
+//                                     </tr>
+//                                 })}
+//                             </table>
+//                         }
+//                     } else if let Some(err) = (*error_message).as_ref() {
+//                         html! { <div class={"error"}>{ err }</div> }
+//                     } else {
+//                         html! { <div>{"No new messages"}</div> }
+//                     }
+//                 }
+//             </div>
+//         </>
+//     }
+// }
+
+
+
+
+
+// #[styled_component(Getdata)]
 // pub fn get_user() -> Html {
 //     let stylesheet = Style::new(css!(
 //         r#"
@@ -165,58 +337,73 @@ let (store, dispatch) = use_store::<Store>();
 //     .unwrap();
 
 //     let history = use_navigator().unwrap();
-//     let (_store, store_dispatch) = use_store::<Store>();
+//     let (store, store_dispatch) = use_store::<store::Store>();
 //     let success_message = use_state(|| None::<String>);
 //     let error_message = use_state(|| None::<String>);
-
 //     let onsubmit = {
 //         let store_dispatch = store_dispatch.clone();
 //         let history = history.clone();
 //         let success_message = success_message.clone();
 //         let error_message = error_message.clone();
-
-//         Callback::from(move |user_id: i32| {
+    
+//         Callback::from(move |user :GetResponse| {
 //             let store_dispatch = store_dispatch.clone();
 //             let history = history.clone();
 //             let success_message = success_message.clone();
 //             let error_message = error_message.clone();
-            
+//             let token = store.token.clone();
 //             spawn_local(async move {
-//                 match api::get_tasks(token).await {
-//                     Ok(user) => {
-//                         // Process user data, maybe store in store_dispatch if needed
-//                         // For example: store_dispatch(UserAction::SetUser(user));
-//                         success_message.set(Some(format!("User data fetched: {:?}", user)));
+//                 match api::get_tasks(&token).await {
+//                     Ok(response) => {
+//                         let formatted_notes = response.notes.iter()
+//                             .map(|note| format!("ID: {}, Name: {}, Location: {}, Data: {}", note.id, note.name, note.location, note.data))
+//                             .collect::<Vec<String>>()
+//                             .join(", ");
+//                         success_message.set(Some(format!("Notes data fetched: {}", formatted_notes)));
 //                     },
 //                     Err(e) => {
 //                         println!("{:?}", e);
-//                         let error_message_str = e.as_string().unwrap_or_else(|| "Unknown error".to_string());
-//                         error_message.set(Some(format!("Failed to fetch user data: {}", error_message_str)));
+//                         let error_message_str = e.to_string();
+//                         error_message.set(Some(format!("Failed to fetch notes: {}", error_message_str)));
 //                     }
 //                 }
 //             });
 //         })
 //     };
-
+    
 //     html! {
-//       <div class={stylesheet}>
-//         <h1>{"Get User"}</h1>
-//         <section>
-//           <div>
-//             // Form or input for providing user ID
-//             <UserForm {onsubmit} />
-//             if let Some(message) = (*success_message).as_ref() {
-//                 <div class={"message"}>{ message }</div>
-//             }
-//             if let Some(error) = (*error_message).as_ref() {
-//                 <div class={"error"}>{ error }</div>
-//             }
-//           </div>
-//         </section>
-//       </div>
+//         <div class={stylesheet}>
+//             <h1>{"Get User Notes"}</h1>
+//             <section>
+//                 <div>
+//                     if let Some(message) = (*success_message).as_ref() {
+//                         <div class={"message"}>{ message }</div>
+//                     }
+//                     if let Some(error) = (*error_message).as_ref() {
+//                         <div class={"error"}>{ error }</div>
+//                     }
+//                 </div>
+//             </section>
+//         </div>
 //     }
 // }
-
+// //     html! {
+// //         <div class={stylesheet}>
+// //             <h1>{"Get User"}</h1>
+// //             <section>
+// //                 <div>
+// //                     // Form or input for providing user ID
+// //                     if let Some(message) = (*success_message).as_ref() {
+// //                         <div class={"message"}>{ message }</div>
+// //                     }
+// //                     if let Some(error) = (*error_message).as_ref() {
+// //                         <div class={"error"}>{ error }</div>
+// //                     }
+// //                 </div>
+// //             </section>
+// //         </div>
+// //     }
+// // }    
 
 
 

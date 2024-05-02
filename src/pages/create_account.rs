@@ -86,14 +86,6 @@ pub fn create_account() -> Html {
                 match api::create_account(user_data.username, user_data.password, user_data.email).await {
                     Ok(auth_response) => {
                         success_message.set(Some("Sign-up successful! Redirecting...".to_string()));
-                        // login_reducer(&auth_response, store_dispatch);
-                         // Redirect to OTP verification page
-                      //    if let Some(nav) = navigator_clone {
-                      //     nav.push(&Route::Home);  // Now safe to call push
-                      // }
-                    //   if let Some(nav) = navigator_ref {
-                    //     nav.push(&Route::OtpVerify);  // Using reference, not moving
-                    // }
                         history.push(&Route::ConfirmSignUp);  
                     },
                     Err(error) => {
