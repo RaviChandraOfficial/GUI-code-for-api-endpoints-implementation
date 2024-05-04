@@ -18,7 +18,7 @@ impl Default for Store {
 }
 
 
-
+#[allow(dead_code)]
 pub struct PostCredentials{
     pub id: i32,
     pub name:String,
